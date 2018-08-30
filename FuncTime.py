@@ -18,16 +18,15 @@ def add(x, y):
     time.sleep(2)
     return x + y
 
-print(add(2,3))
+#print(add(2,3))
 
 #使用上下文管理显示该函数的执行时长
-def add(x, y):
-    time.sleep(2)
-    return x + y
 
 class TimeIt2:
     def __init__(self,fn):
+        print('init')
         self.fn=fn
+        wraps(fn)(self)
 
     def __enter__(self):
         self.start=datetime.datetime.now()
@@ -37,10 +36,26 @@ class TimeIt2:
         self.delta=(datetime.datetime.now()-self.start).total_seconds()
         print('*****{} took {} s'.format(self.fn.__name__,self.delta))
 
-    def __call__(self,x,y):
-        print('*****',x,y)
-        return self.fn(x,y)
+    def __call__(self,*args,**kwargs):
+        print('*****call*******')
+        start=datetime.datetime.now()
+        ret=self.fn(*args,**kwargs)
+        delta=(datetime.datetime.now()-start).total_seconds()
+        print('{} took {} s'.format(self.fn.__name__,delta))
+        return ret
+
+@TimeIt2     #类装饰器
+def add(x, y):
+    """This is a add function"""
+    time.sleep(2)
+    return x + y
+
+print(add(2,5))
+print(add.__dict__)
 
 
-with TimeIt2(add) as f:
-    f(2,3)
+
+#with TimeIt2(add) as f:
+#    f(2,3)
+
+
